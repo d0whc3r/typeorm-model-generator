@@ -46,6 +46,7 @@ Options:
                             [default: "Z:\Repos\typeorm-model-generator\output"]
   -s, --schema           Schema name to create model from. Only for mssql and
                          postgres
+  -i, --ignore           Tables to ignore, separed by commas       [default: ""]
   --ssl                                               [boolean] [default: false]
   --noConfig             Doesn't create tsconfig.json and ormconfig.json
                                                       [boolean] [default: false]
