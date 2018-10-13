@@ -1,11 +1,12 @@
 import { AbstractDriver } from "./drivers/AbstractDriver";
 import { DatabaseModel } from "./models/DatabaseModel";
 import * as Handlebars from "handlebars";
+import * as TomgUtils from "./Utils";
+import { AbstractNamingStrategy } from "./AbstractNamingStrategy";
+import { EntityInfo } from "./models/EntityInfo";
 import fs = require("fs");
 import path = require("path");
-import * as TomgUtils from "./Utils";
 import changeCase = require("change-case");
-import { AbstractNamingStrategy } from "./AbstractNamingStrategy";
 
 export class Engine {
     constructor(
@@ -72,44 +73,55 @@ export class Engine {
             if (!fs.existsSync(entitesPath)) fs.mkdirSync(entitesPath);
         }
         let compliedTemplate = Handlebars.compile(template, { noEscape: true });
-        databaseModel.entities.forEach(element => {
-            element.Imports = [];
-            element.Columns.forEach(column => {
-                column.relations.forEach(relation => {
-                    if (element.EntityName !== relation.relatedTable) {
-                        element.Imports.push(relation.relatedTable);
-                    }
+        databaseModel.entities
+            .filter(
+                (entityInfo: EntityInfo) =>
+                    this.Options.ignore.indexOf(entityInfo.EntityName) < 0
+            )
+            .forEach(element => {
+                element.Imports = [];
+                element.Columns.forEach(column => {
+                    column.relations.forEach(relation => {
+                        if (element.EntityName !== relation.relatedTable) {
+                            element.Imports.push(relation.relatedTable);
+                        }
+                    });
+                });
+                element.GenerateConstructor = this.Options.constructor;
+                element.Imports.filter(function(elem, index, self) {
+                    return index === self.indexOf(elem);
+                });
+                let casedFileName = "";
+                switch (this.Options.convertCaseFile) {
+                    case "camel":
+                        casedFileName = changeCase.camelCase(
+                            element.EntityName
+                        );
+                        break;
+                    case "param":
+                        casedFileName = changeCase.paramCase(
+                            element.EntityName
+                        );
+                        break;
+                    case "pascal":
+                        casedFileName = changeCase.pascalCase(
+                            element.EntityName
+                        );
+                        break;
+                    case "none":
+                        casedFileName = element.EntityName;
+                        break;
+                }
+                let resultFilePath = path.resolve(
+                    entitesPath,
+                    casedFileName + ".ts"
+                );
+                let rendered = compliedTemplate(element);
+                fs.writeFileSync(resultFilePath, rendered, {
+                    encoding: "UTF-8",
+                    flag: "w"
                 });
             });
-            element.GenerateConstructor = this.Options.constructor;
-            element.Imports.filter(function(elem, index, self) {
-                return index === self.indexOf(elem);
-            });
-            let casedFileName = "";
-            switch (this.Options.convertCaseFile) {
-                case "camel":
-                    casedFileName = changeCase.camelCase(element.EntityName);
-                    break;
-                case "param":
-                    casedFileName = changeCase.paramCase(element.EntityName);
-                    break;
-                case "pascal":
-                    casedFileName = changeCase.pascalCase(element.EntityName);
-                    break;
-                case "none":
-                    casedFileName = element.EntityName;
-                    break;
-            }
-            let resultFilePath = path.resolve(
-                entitesPath,
-                casedFileName + ".ts"
-            );
-            let rendered = compliedTemplate(element);
-            fs.writeFileSync(resultFilePath, rendered, {
-                encoding: "UTF-8",
-                flag: "w"
-            });
-        });
     }
     private createHandlebarsHelpers() {
         Handlebars.registerHelper("curly", open => {
@@ -271,6 +283,7 @@ export interface EngineOptions {
     resultsPath: string;
     databaseType: string;
     schemaName: string;
+    ignore: string[];
     ssl: boolean;
     noConfigs: boolean;
     convertCaseFile: "pascal" | "param" | "camel" | "none";

@@ -54,6 +54,11 @@ var argv = Yargs.usage(
         describe:
             "Schema name to create model from. Only for mssql and postgres"
     })
+    .option("i", {
+        alias: "ignore",
+        describe: "Tables to ignore, separed by commas",
+        default: ""
+    })
     .option("ssl", {
         boolean: true,
         default: false
@@ -157,6 +162,7 @@ let engine = new Engine(driver, {
     databaseType: argv.e,
     resultsPath: argv.o ? argv.o.toString() : null,
     schemaName: argv.s ? argv.s.toString() : standardSchema,
+    ignore: argv.i ? argv.i.toString().split(",") : [],
     ssl: argv.ssl,
     noConfigs: argv.noConfig,
     convertCaseFile: argv.cf,
