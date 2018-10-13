@@ -56,6 +56,14 @@ export class MysqlDriver extends AbstractDriver {
                         case "int":
                             colInfo.ts_type = "number";
                             break;
+                        case "bit":
+                            if (resp.column_type == "bit(1)") {
+                                colInfo.width = 1;
+                                colInfo.ts_type = "boolean";
+                            } else {
+                                colInfo.ts_type = "number";
+                            }
+                            break;
                         case "tinyint":
                             if (resp.column_type == "tinyint(1)") {
                                 colInfo.width = 1;
@@ -302,8 +310,14 @@ export class MysqlDriver extends AbstractDriver {
                 rels.referencedTable = resp.TableReferenced;
                 relationsTemp.push(rels);
             }
-            rels.ownerColumnsNames.push(resp.ForeignKeyColumn);
-            rels.referencedColumnsNames.push(resp.ForeignKeyColumnReferenced);
+            // rels.ownerColumnsNames.push(resp.ForeignKeyColumn);
+            // rels.referencedColumnsNames.push(resp.ForeignKeyColumnReferenced);
+            if (!rels.ownerColumnsNames.includes(resp.ForeignKeyColumn)) {
+                rels.ownerColumnsNames.push(resp.ForeignKeyColumn);
+                rels.referencedColumnsNames.push(
+                    resp.ForeignKeyColumnReferenced
+                );
+            }
         });
         entities = this.GetRelationsFromRelationTempInfo(
             relationsTemp,
