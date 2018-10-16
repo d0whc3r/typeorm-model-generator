@@ -67,8 +67,8 @@ export class Engine {
         if (!fs.existsSync(resultPath)) fs.mkdirSync(resultPath);
         let entitesPath = resultPath;
         if (!this.Options.noConfigs) {
-            this.createTsConfigFile(resultPath);
-            this.createTypeOrmConfig(resultPath);
+            // this.createTsConfigFile(resultPath);
+            // this.createTypeOrmConfig(resultPath);
             entitesPath = path.resolve(resultPath, "./entities");
             if (!fs.existsSync(entitesPath)) fs.mkdirSync(entitesPath);
         }
