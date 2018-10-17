@@ -7,6 +7,7 @@ import { EntityInfo } from "../../src/models/EntityInfo";
 import { ColumnInfo } from "../../src/models/ColumnInfo";
 import { RelationInfo } from "../../src/models/RelationInfo";
 import { NamingStrategy } from "../../src/NamingStrategy";
+import { IndexInfo } from "../../src/models/IndexInfo";
 
 class fakeResponse implements MSSQL.IResult<any> {
     recordsets: MSSQL.IRecordSet<any>[];
