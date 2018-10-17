@@ -2,6 +2,9 @@ import { AbstractDriver } from "./AbstractDriver";
 import { ColumnInfo } from "../models/ColumnInfo";
 import { EntityInfo } from "../models/EntityInfo";
 import * as TomgUtils from "../Utils";
+import { IndexInfo } from "../models/IndexInfo";
+import { IndexColumnInfo } from "../models/IndexColumnInfo";
+import { RelationTempInfo } from "../models/RelationTempInfo";
 
 export class SqliteDriver extends AbstractDriver {
     sqlite = require("sqlite3").verbose();
@@ -26,6 +29,7 @@ export class SqliteDriver extends AbstractDriver {
         });
         return ret;
     }
+
     async GetCoulmnsFromEntity(
         entities: EntityInfo[],
         schema: string
@@ -55,83 +59,39 @@ export class SqliteDriver extends AbstractDriver {
                     this.tablesWithGeneratedPrimaryKey.includes(ent.EntityName);
                 switch (colInfo.sql_type) {
                     case "int":
-                        colInfo.ts_type = "number";
-                        break;
                     case "integer":
-                        colInfo.ts_type = "number";
-                        break;
                     case "int2":
-                        colInfo.ts_type = "number";
-                        break;
                     case "int8":
-                        colInfo.ts_type = "number";
-                        break;
                     case "tinyint":
-                        colInfo.ts_type = "number";
-                        break;
                     case "smallint":
-                        colInfo.ts_type = "number";
-                        break;
                     case "mediumint":
-                        colInfo.ts_type = "number";
-                        break;
                     case "bigint":
-                        colInfo.ts_type = "string";
-                        break;
                     case "unsigned big int":
-                        colInfo.ts_type = "string";
+                    case "real":
+                    case "double":
+                    case "double precision":
+                    case "float":
+                    case "numeric":
+                    case "decimal":
+                        colInfo.ts_type = "number";
                         break;
                     case "character":
-                        colInfo.ts_type = "string";
-                        break;
                     case "varchar":
-                        colInfo.ts_type = "string";
-                        break;
                     case "varying character":
-                        colInfo.ts_type = "string";
-                        break;
                     case "nchar":
-                        colInfo.ts_type = "string";
-                        break;
                     case "native character":
-                        colInfo.ts_type = "string";
-                        break;
                     case "nvarchar":
-                        colInfo.ts_type = "string";
-                        break;
                     case "text":
+                    case "clob":
                         colInfo.ts_type = "string";
                         break;
                     case "blob":
                         colInfo.ts_type = "Buffer";
                         break;
-                    case "clob":
-                        colInfo.ts_type = "string";
-                        break;
-                    case "real":
-                        colInfo.ts_type = "number";
-                        break;
-                    case "double":
-                        colInfo.ts_type = "number";
-                        break;
-                    case "double precision":
-                        colInfo.ts_type = "number";
-                        break;
-                    case "float":
-                        colInfo.ts_type = "number";
-                        break;
-                    case "numeric":
-                        colInfo.ts_type = "number";
-                        break;
-                    case "decimal":
-                        colInfo.ts_type = "number";
-                        break;
                     case "boolean":
                         colInfo.ts_type = "boolean";
                         break;
                     case "date":
-                        colInfo.ts_type = "string";
-                        break;
                     case "datetime":
                         colInfo.ts_type = "Date";
                         break;
@@ -193,6 +153,7 @@ export class SqliteDriver extends AbstractDriver {
 
         return entities;
     }
+
     async GetIndexesFromEntity(
         entities: EntityInfo[],
         schema: string
@@ -244,6 +205,7 @@ export class SqliteDriver extends AbstractDriver {
 
         return entities;
     }
+
     async GetRelations(
         entities: EntityInfo[],
         schema: string
@@ -281,6 +243,7 @@ export class SqliteDriver extends AbstractDriver {
         }
         return entities;
     }
+
     async DisconnectFromServer() {
         this.db.close();
     }
@@ -297,6 +260,7 @@ export class SqliteDriver extends AbstractDriver {
     }
 
     async CreateDB(dbName: string) {}
+
     async UseDB(dbName: string) {
         let promise = new Promise<boolean>((resolve, reject) => {
             this.db = new this.sqlite.Database(dbName, err => {
@@ -310,7 +274,9 @@ export class SqliteDriver extends AbstractDriver {
         });
         return promise;
     }
+
     async DropDB(dbName: string) {}
+
     async CheckIfDBExists(dbName: string): Promise<boolean> {
         return true;
     }

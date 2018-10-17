@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Column, Entity, OneToOne, JoinColumn, Index } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PostDetails } from "./PostDetails";
 import { PostCategory } from "./PostCategory";
 import { PostAuthor } from "./PostAuthor";
@@ -21,20 +21,20 @@ export class Post {
     // post has relation with category, however inverse relation is not set (category does not have relation with post set)
     @OneToOne(type => PostCategory, {
         // cascade: true,
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     @JoinColumn()
-    // @Index({ unique: true })
+        // @Index({ unique: true })
     category: PostCategory;
 
     // post has relation with details. cascade inserts here means if new PostDetails instance will be set to this
     // relation it will be inserted automatically to the db when you save this Post entity
     @OneToOne(type => PostDetails, details => details.post, {
-         onDelete: 'CASCADE'
-         // cascade: true
+        onDelete: "CASCADE"
+        // cascade: true
     })
     @JoinColumn()
-    // @Index({ unique: true })
+        // @Index({ unique: true })
     details: PostDetails;
 
     // post has relation with details. cascade update here means if new PostDetail instance will be set to this relation
@@ -43,31 +43,31 @@ export class Post {
         // cascade: true,
     })
     @JoinColumn()
-    // @Index({ unique: true })
+        // @Index({ unique: true })
     image: PostImage;
 
     // post has relation with details. cascade update here means if new PostDetail instance will be set to this relation
     // it will be inserted automatically to the db when you save this Post entity
     @OneToOne(type => PostMetadata, metadata => metadata.post, {
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     @JoinColumn()
-    // @Index({ unique: true })
+        // @Index({ unique: true })
     metadata: PostMetadata | null;
 
     // post has relation with details. full cascades here
     @OneToOne(type => PostInformation, information => information.post, {
         // cascade: true,
-         onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     @JoinColumn()
-    // @Index({ unique: true })
+        // @Index({ unique: true })
     information: PostInformation;
 
     // post has relation with details. not cascades here. means cannot be persisted, updated or removed
     @OneToOne(type => PostAuthor, author => author.post)
     @JoinColumn()
-    // @Index({ unique: true })
+        // @Index({ unique: true })
     author: PostAuthor;
 
 }

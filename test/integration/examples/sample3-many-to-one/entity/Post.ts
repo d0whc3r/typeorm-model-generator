@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Column, Entity, OneToOne, OneToMany, ManyToOne, JoinColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PostDetails } from "./PostDetails";
 import { PostCategory } from "./PostCategory";
 import { PostAuthor } from "./PostAuthor";
@@ -21,35 +21,35 @@ export class Post {
     // post has relation with category, however inverse relation is not set (category does not have relation with post set)
     @ManyToOne(type => PostCategory, {
         cascade: true,
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     category: PostCategory;
 
     // post has relation with details. cascade inserts here means if new PostDetails instance will be set to this
     // relation it will be inserted automatically to the db when you save this Post entity
     @ManyToOne(type => PostDetails, details => details.posts, {
-        cascade: true,
+        cascade: true
     })
     details: PostDetails;
 
     // post has relation with details. cascade update here means if new PostDetail instance will be set to this relation
     // it will be inserted automatically to the db when you save this Post entity
     @ManyToOne(type => PostImage, image => image.posts, {
-        cascade: true,
+        cascade: true
     })
     image: PostImage;
 
     // post has relation with details. cascade update here means if new PostDetail instance will be set to this relation
     // it will be inserted automatically to the db when you save this Post entity
     @ManyToOne(type => PostMetadata, metadata => metadata.posts, {
-        cascade: true,
+        cascade: true
     })
     metadata: PostMetadata | null;
 
     // post has relation with details. full cascades here
     @ManyToOne(type => PostInformation, information => information.posts, {
         cascade: true,
-        onDelete: 'CASCADE'
+        onDelete: "CASCADE"
     })
     information: PostInformation;
 

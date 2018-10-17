@@ -3,9 +3,13 @@ import * as MYSQL from "mysql";
 import { ColumnInfo } from "../models/ColumnInfo";
 import { EntityInfo } from "../models/EntityInfo";
 import * as TomgUtils from "../Utils";
+import { IndexInfo } from "../models/IndexInfo";
+import { IndexColumnInfo } from "../models/IndexColumnInfo";
+import { RelationTempInfo } from "../models/RelationTempInfo";
 
 export class MysqlDriver extends AbstractDriver {
     readonly EngineName: string = "MySQL";
+    private Connection: MYSQL.Connection;
 
     GetAllTablesQuery = async (schema: string) => {
         let response = this.ExecQuery<{
@@ -53,9 +57,6 @@ export class MysqlDriver extends AbstractDriver {
                     colInfo.default = resp.COLUMN_DEFAULT;
                     colInfo.sql_type = resp.DATA_TYPE;
                     switch (resp.DATA_TYPE) {
-                        case "int":
-                            colInfo.ts_type = "number";
-                            break;
                         case "bit":
                             if (resp.column_type == "bit(1)") {
                                 colInfo.width = 1;
@@ -72,68 +73,44 @@ export class MysqlDriver extends AbstractDriver {
                                 colInfo.ts_type = "number";
                             }
                             break;
+                        case "int":
                         case "smallint":
-                            colInfo.ts_type = "number";
-                            break;
                         case "mediumint":
-                            colInfo.ts_type = "number";
-                            break;
                         case "bigint":
-                            colInfo.ts_type = "string";
-                            break;
                         case "float":
-                            colInfo.ts_type = "number";
-                            break;
                         case "double":
-                            colInfo.ts_type = "number";
-                            break;
-                        case "decimal":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "date":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "datetime":
-                            colInfo.ts_type = "Date";
-                            break;
-                        case "timestamp":
-                            colInfo.ts_type = "Date";
-                            break;
-                        case "time":
-                            colInfo.ts_type = "string";
-                            break;
                         case "year":
                             colInfo.ts_type = "number";
                             break;
+                        case "decimal":
+                        case "date":
                         case "char":
+                        case "varchar":
+                        case "time":
+                        case "text":
+                        case "tinytext":
+                        case "mediumtext":
+                        case "longtext":
+                        case "geometry":
+                        case "point":
+                        case "linestring":
+                        case "polygon":
+                        case "multipoint":
+                        case "multilinestring":
+                        case "multipolygon":
+                        case "geometrycollection":
                             colInfo.ts_type = "string";
                             break;
-                        case "varchar":
-                            colInfo.ts_type = "string";
+                        case "datetime":
+                        case "timestamp":
+                            colInfo.ts_type = "Date";
                             break;
                         case "blob":
-                            colInfo.ts_type = "Buffer";
-                            break;
-                        case "text":
-                            colInfo.ts_type = "string";
-                            break;
                         case "tinyblob":
-                            colInfo.ts_type = "Buffer";
-                            break;
-                        case "tinytext":
-                            colInfo.ts_type = "string";
-                            break;
                         case "mediumblob":
-                            colInfo.ts_type = "Buffer";
-                            break;
-                        case "mediumtext":
-                            colInfo.ts_type = "string";
-                            break;
                         case "longblob":
+                        case "binary":
                             colInfo.ts_type = "Buffer";
-                            break;
-                        case "longtext":
-                            colInfo.ts_type = "string";
                             break;
                         case "enum":
                             colInfo.ts_type = "string";
@@ -143,33 +120,6 @@ export class MysqlDriver extends AbstractDriver {
                             break;
                         case "json":
                             colInfo.ts_type = "Object";
-                            break;
-                        case "binary":
-                            colInfo.ts_type = "Buffer";
-                            break;
-                        case "geometry":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "point":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "linestring":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "polygon":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "multipoint":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "multilinestring":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "multipolygon":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "geometrycollection":
-                            colInfo.ts_type = "string";
                             break;
                         default:
                             TomgUtils.LogError(
@@ -217,6 +167,7 @@ export class MysqlDriver extends AbstractDriver {
         });
         return entities;
     }
+
     async GetIndexesFromEntity(
         entities: EntityInfo[],
         schema: string
@@ -262,6 +213,7 @@ export class MysqlDriver extends AbstractDriver {
 
         return entities;
     }
+
     async GetRelations(
         entities: EntityInfo[],
         schema: string
@@ -325,6 +277,7 @@ export class MysqlDriver extends AbstractDriver {
         );
         return entities;
     }
+
     async DisconnectFromServer() {
         let promise = new Promise<boolean>((resolve, reject) => {
             this.Connection.end(err => {
@@ -343,7 +296,6 @@ export class MysqlDriver extends AbstractDriver {
         if (this.Connection) await promise;
     }
 
-    private Connection: MYSQL.Connection;
     async ConnectToServer(
         database: string,
         server: string,
@@ -393,21 +345,26 @@ export class MysqlDriver extends AbstractDriver {
 
         await promise;
     }
+
     async CreateDB(dbName: string) {
         await this.ExecQuery<any>(`CREATE DATABASE ${dbName}; `);
     }
+
     async UseDB(dbName: string) {
         await this.ExecQuery<any>(`USE ${dbName}; `);
     }
+
     async DropDB(dbName: string) {
         await this.ExecQuery<any>(`DROP DATABASE ${dbName}; `);
     }
+
     async CheckIfDBExists(dbName: string): Promise<boolean> {
         let resp = await this.ExecQuery<any>(
             `SHOW DATABASES LIKE '${dbName}' `
         );
         return resp.length > 0;
     }
+
     async ExecQuery<T>(sql: string): Promise<Array<T>> {
         let ret: Array<T> = [];
         let query = this.Connection.query(sql);

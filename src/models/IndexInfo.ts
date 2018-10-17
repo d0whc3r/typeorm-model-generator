@@ -1,4 +1,4 @@
-interface IndexInfo {
+export interface IndexInfo {
     name: string;
     columns: IndexColumnInfo[];
     isUnique: boolean;

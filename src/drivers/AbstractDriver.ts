@@ -4,13 +4,68 @@ import * as TomgUtils from "../Utils";
 import { RelationInfo } from "../models/RelationInfo";
 import { ColumnInfo } from "../models/ColumnInfo";
 import {
-    WithWidthColumnType,
+    WithLengthColumnType,
     WithPrecisionColumnType,
-    WithLengthColumnType
+    WithWidthColumnType
 } from "typeorm/driver/types/ColumnTypes";
 import { AbstractNamingStrategy } from "../AbstractNamingStrategy";
+import { IndexInfo } from "../models/IndexInfo";
+import { RelationTempInfo } from "../models/RelationTempInfo";
 
 export abstract class AbstractDriver {
+    ColumnTypesWithWidth: WithWidthColumnType[] = [
+        "tinyint",
+        "smallint",
+        "mediumint",
+        "int",
+        "bigint"
+    ];
+    ColumnTypesWithPrecision: WithPrecisionColumnType[] = [
+        "float",
+        "double",
+        "dec",
+        "decimal",
+        "numeric",
+        "real",
+        "double precision",
+        "number",
+        "datetime",
+        "datetime2",
+        "datetimeoffset",
+        "time",
+        "time with time zone",
+        "time without time zone",
+        "timestamp",
+        "timestamp without time zone",
+        "timestamp with time zone",
+        "timestamp with local time zone"
+    ];
+    ColumnTypesWithLength: WithLengthColumnType[] = [
+        "character varying",
+        "varying character",
+        "nvarchar",
+        "character",
+        "native character",
+        "varchar",
+        "char",
+        "nchar",
+        "varchar2",
+        "nvarchar2",
+        "raw",
+        "binary",
+        "varbinary"
+    ];
+    namingStrategy: AbstractNamingStrategy;
+    generateRelationsIds: boolean;
+    abstract GetAllTablesQuery: (
+        schema: string
+    ) => Promise<
+        {
+            TABLE_SCHEMA: string;
+            TABLE_NAME: string;
+        }[]
+    >;
+
     changeColumnNames(dbModel: DatabaseModel) {
         dbModel.entities.forEach(entity => {
             entity.Columns.forEach(column => {
@@ -55,6 +110,7 @@ export abstract class AbstractDriver {
             });
         });
     }
+
     changeEntityNames(dbModel: DatabaseModel) {
         dbModel.entities.forEach(entity => {
             let newName = this.namingStrategy.entityName(entity.EntityName);
@@ -71,6 +127,7 @@ export abstract class AbstractDriver {
             entity.EntityName = newName;
         });
     }
+
     changeRelationNames(dbModel: DatabaseModel) {
         dbModel.entities.forEach(entity => {
             entity.Columns.forEach(column => {
@@ -116,50 +173,6 @@ export abstract class AbstractDriver {
             });
         });
     }
-    ColumnTypesWithWidth: WithWidthColumnType[] = [
-        "tinyint",
-        "smallint",
-        "mediumint",
-        "int",
-        "bigint"
-    ];
-    ColumnTypesWithPrecision: WithPrecisionColumnType[] = [
-        "float",
-        "double",
-        "dec",
-        "decimal",
-        "numeric",
-        "real",
-        "double precision",
-        "number",
-        "datetime",
-        "datetime2",
-        "datetimeoffset",
-        "time",
-        "time with time zone",
-        "time without time zone",
-        "timestamp",
-        "timestamp without time zone",
-        "timestamp with time zone",
-        "timestamp with local time zone"
-    ];
-    ColumnTypesWithLength: WithLengthColumnType[] = [
-        "character varying",
-        "varying character",
-        "nvarchar",
-        "character",
-        "native character",
-        "varchar",
-        "char",
-        "nchar",
-        "varchar2",
-        "nvarchar2",
-        "raw",
-        "binary",
-        "varbinary"
-    ];
-    namingStrategy: AbstractNamingStrategy;
-    generateRelationsIds: boolean;
 
     FindManyToManyRelations(dbModel: DatabaseModel) {
         let manyToManyEntities = dbModel.entities.filter(entity => {
@@ -232,6 +245,7 @@ export abstract class AbstractDriver {
             }
         });
     }
+
     async GetDataFromServer(
         database: string,
         server: string,
@@ -262,12 +276,6 @@ export abstract class AbstractDriver {
         return dbModel;
     }
 
-    private ApplyNamingStrategy(dbModel: DatabaseModel) {
-        this.changeRelationNames(dbModel);
-        this.changeEntityNames(dbModel);
-        this.changeColumnNames(dbModel);
-    }
-
     abstract async ConnectToServer(
         database: string,
         server: string,
@@ -276,15 +284,6 @@ export abstract class AbstractDriver {
         password: string,
         ssl: boolean
     );
-
-    abstract GetAllTablesQuery: (
-        schema: string
-    ) => Promise<
-        {
-            TABLE_SCHEMA: string;
-            TABLE_NAME: string;
-        }[]
-    >;
 
     async GetAllTables(schema: string): Promise<EntityInfo[]> {
         let response = await this.GetAllTablesQuery(schema);
@@ -451,14 +450,17 @@ export abstract class AbstractDriver {
         });
         return entities;
     }
+
     abstract async GetCoulmnsFromEntity(
         entities: EntityInfo[],
         schema: string
     ): Promise<EntityInfo[]>;
+
     abstract async GetIndexesFromEntity(
         entities: EntityInfo[],
         schema: string
     ): Promise<EntityInfo[]>;
+
     abstract async GetRelations(
         entities: EntityInfo[],
         schema: string
@@ -489,9 +491,20 @@ export abstract class AbstractDriver {
             }
         });
     }
+
     abstract async DisconnectFromServer();
+
     abstract async CreateDB(dbName: string);
+
     abstract async DropDB(dbName: string);
+
     abstract async UseDB(dbName: string);
+
     abstract async CheckIfDBExists(dbName: string): Promise<boolean>;
+
+    private ApplyNamingStrategy(dbModel: DatabaseModel) {
+        this.changeRelationNames(dbModel);
+        this.changeEntityNames(dbModel);
+        this.changeColumnNames(dbModel);
+    }
 }

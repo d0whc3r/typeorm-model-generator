@@ -1,4 +1,4 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable } from "typeorm"
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Author } from "./Author";
 import { Category } from "./Category";
 

@@ -18,12 +18,15 @@ export class RelationInfo {
     get isOneToMany(): boolean {
         return this.relationType == "OneToMany";
     }
+
     get isManyToMany(): boolean {
         return this.relationType == "ManyToMany";
     }
+
     get isOneToOne(): boolean {
         return this.relationType == "OneToOne";
     }
+
     get isManyToOne(): boolean {
         return this.relationType == "ManyToOne";
     }

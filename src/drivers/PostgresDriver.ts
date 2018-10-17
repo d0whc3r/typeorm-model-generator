@@ -3,6 +3,9 @@ import * as PG from "pg";
 import { ColumnInfo } from "../models/ColumnInfo";
 import { EntityInfo } from "../models/EntityInfo";
 import * as TomgUtils from "../Utils";
+import { IndexInfo } from "../models/IndexInfo";
+import { IndexColumnInfo } from "../models/IndexColumnInfo";
+import { RelationTempInfo } from "../models/RelationTempInfo";
 
 export class PostgresDriver extends AbstractDriver {
     private Connection: PG.Client;
@@ -366,6 +369,7 @@ export class PostgresDriver extends AbstractDriver {
         }
         return ret;
     }
+
     async GetIndexesFromEntity(
         entities: EntityInfo[],
         schema: string
@@ -433,6 +437,7 @@ export class PostgresDriver extends AbstractDriver {
 
         return entities;
     }
+
     async GetRelations(
         entities: EntityInfo[],
         schema: string
@@ -511,6 +516,7 @@ export class PostgresDriver extends AbstractDriver {
         );
         return entities;
     }
+
     async DisconnectFromServer() {
         if (this.Connection) {
             let promise = new Promise<boolean>((resolve, reject) => {
@@ -569,12 +575,15 @@ export class PostgresDriver extends AbstractDriver {
     async CreateDB(dbName: string) {
         await this.Connection.query(`CREATE DATABASE ${dbName}; `);
     }
+
     async UseDB(dbName: string) {
         await this.Connection.query(`USE ${dbName}; `);
     }
+
     async DropDB(dbName: string) {
         await this.Connection.query(`DROP DATABASE ${dbName}; `);
     }
+
     async CheckIfDBExists(dbName: string): Promise<boolean> {
         let resp = await this.Connection.query(
             `SELECT datname FROM pg_database  WHERE datname  ='${dbName}' `

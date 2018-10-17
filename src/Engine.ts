@@ -36,6 +36,7 @@ export class Engine {
         }
         return true;
     }
+
     private async getEntitiesInfo(
         database: string,
         server: string,
@@ -59,12 +60,21 @@ export class Engine {
             relationIds
         );
     }
+
     private createModelFromMetadata(databaseModel: DatabaseModel) {
         this.createHandlebarsHelpers();
-        let templatePath = path.resolve(__dirname, "../../src/entity.mst");
-        let template = fs.readFileSync(templatePath, "UTF-8");
+        let templatePath = path.resolve(__dirname, "entity.mst");
+        let template;
+        try {
+            template = fs.readFileSync(templatePath, "UTF-8");
+        } catch (err) {
+            templatePath = path.resolve(__dirname, "../../src/entity.mst");
+            template = fs.readFileSync(templatePath, "UTF-8");
+        }
         let resultPath = this.Options.resultsPath;
-        if (!fs.existsSync(resultPath)) fs.mkdirSync(resultPath);
+        if (!fs.existsSync(resultPath)) {
+            fs.mkdirSync(resultPath);
+        }
         let entitesPath = resultPath;
         if (!this.Options.noConfigs) {
             // this.createTsConfigFile(resultPath);
@@ -123,6 +133,7 @@ export class Engine {
                 });
             });
     }
+
     private createHandlebarsHelpers() {
         Handlebars.registerHelper("curly", open => {
             return open ? "{" : "}";
@@ -229,6 +240,7 @@ export class Engine {
             { encoding: "UTF-8", flag: "w" }
         );
     }
+
     private createTypeOrmConfig(resultPath) {
         if (this.Options.schemaName == "") {
             fs.writeFileSync(
@@ -274,6 +286,7 @@ export class Engine {
         }
     }
 }
+
 export interface EngineOptions {
     host: string;
     port: number;

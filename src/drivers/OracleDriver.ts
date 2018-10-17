@@ -2,9 +2,14 @@ import { AbstractDriver } from "./AbstractDriver";
 import { ColumnInfo } from "../models/ColumnInfo";
 import { EntityInfo } from "../models/EntityInfo";
 import * as TomgUtils from "../Utils";
+import { IndexInfo } from "../models/IndexInfo";
+import { IndexColumnInfo } from "../models/IndexColumnInfo";
+import { RelationTempInfo } from "../models/RelationTempInfo";
 
 export class OracleDriver extends AbstractDriver {
     Oracle: any;
+    private Connection: any /*Oracle.IConnection*/;
+
     constructor() {
         super();
         try {
@@ -183,6 +188,7 @@ export class OracleDriver extends AbstractDriver {
         });
         return entities;
     }
+
     async GetIndexesFromEntity(
         entities: EntityInfo[],
         schema: string
@@ -230,6 +236,7 @@ export class OracleDriver extends AbstractDriver {
 
         return entities;
     }
+
     async GetRelations(
         entities: EntityInfo[],
         schema: string
@@ -280,11 +287,11 @@ export class OracleDriver extends AbstractDriver {
         );
         return entities;
     }
+
     async DisconnectFromServer() {
         if (this.Connection) await this.Connection.close();
     }
 
-    private Connection: any /*Oracle.IConnection*/;
     async ConnectToServer(
         database: string,
         server: string,
@@ -338,10 +345,13 @@ export class OracleDriver extends AbstractDriver {
         );
         await this.Connection.execute(`GRANT CONNECT TO ${dbName}`);
     }
+
     async UseDB(dbName: string) {}
+
     async DropDB(dbName: string) {
         await this.Connection.execute(`DROP USER ${dbName} CASCADE`);
     }
+
     async CheckIfDBExists(dbName: string): Promise<boolean> {
         var x = await this.Connection.execute(
             `select count(*) as CNT from dba_users where username='${dbName.toUpperCase()}'`

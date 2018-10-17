@@ -1,10 +1,10 @@
-import { PrimaryGeneratedColumn, Column, Entity, OneToOne, OneToMany, ManyToOne, ManyToMany, JoinColumn, JoinTable } from "typeorm";
-import {PostDetail} from "./PostDetail";
-import {PostCategory} from "./PostCategory";
-import {PostAuthor} from "./PostAuthor";
-import {PostInformation} from "./PostInformation";
-import {PostImage} from "./PostImage";
-import {PostMetadata} from "./PostMetadata";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { PostDetail } from "./PostDetail";
+import { PostCategory } from "./PostCategory";
+import { PostAuthor } from "./PostAuthor";
+import { PostInformation } from "./PostInformation";
+import { PostImage } from "./PostImage";
+import { PostMetadata } from "./PostMetadata";
 
 @Entity("Post")
 export class Post {

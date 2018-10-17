@@ -8,9 +8,9 @@ import { OracleDriver } from "./drivers/OracleDriver";
 import { Engine } from "./Engine";
 import * as Yargs from "yargs";
 import * as TomgUtils from "./Utils";
-import path = require("path");
 import { AbstractNamingStrategy } from "./AbstractNamingStrategy";
 import { NamingStrategy } from "./NamingStrategy";
+import path = require("path");
 
 var argv = Yargs.usage(
     "Usage: typeorm-model-generator -h <host> -d <database> -p [port] -u <user> -x [password] -e [engine]"
@@ -174,7 +174,7 @@ let engine = new Engine(driver, {
     namingStrategy: namingStrategy
 });
 
-console.log(TomgUtils.packageVersion());
+// console.log(TomgUtils.packageVersion());
 console.log(
     `[${new Date().toLocaleTimeString()}] Starting creation of model classes.`
 );

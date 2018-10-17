@@ -17,7 +17,7 @@ Suported db engines:
 
 ## Installation
 ### Global module
-To install module globally simply type `npm i -g typeorm-model-generator` in your console.
+To install module globally simply type `npm i -g @d0whc3r/typeorm-model-generator` in your console.
 ### Npx way
 Thanks to npx you can use npm modules without polluting global installs. So nothing to do here :)
 >To use `npx` you need to use npm at version at least 5.2.0. Try updating your npm by `npm i -g npm`

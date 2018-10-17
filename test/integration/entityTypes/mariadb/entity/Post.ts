@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity("Post")
 export class Post {
@@ -15,7 +15,7 @@ export class Post {
     @Column("tinyint")
     tinyint: number;
 
-    @Column("tinyint",{width:1})
+    @Column("tinyint", { width: 1 })
     boolean: boolean;
 
     @Column("smallint")

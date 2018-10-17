@@ -3,8 +3,13 @@ import * as MSSQL from "mssql";
 import { ColumnInfo } from "../models/ColumnInfo";
 import { EntityInfo } from "../models/EntityInfo";
 import * as TomgUtils from "../Utils";
+import { IndexInfo } from "../models/IndexInfo";
+import { IndexColumnInfo } from "../models/IndexColumnInfo";
+import { RelationTempInfo } from "../models/RelationTempInfo";
 
 export class MssqlDriver extends AbstractDriver {
+    private Connection: MSSQL.ConnectionPool;
+
     GetAllTablesQuery = async (schema: string) => {
         let request = new MSSQL.Request(this.Connection);
         let response: {
@@ -61,104 +66,50 @@ export class MssqlDriver extends AbstractDriver {
                     colInfo.default = resp.COLUMN_DEFAULT;
                     colInfo.sql_type = resp.DATA_TYPE;
                     switch (resp.DATA_TYPE) {
-                        case "bigint":
-                            colInfo.ts_type = "string";
-                            break;
                         case "bit":
                             colInfo.ts_type = "boolean";
                             break;
+                        case "bigint":
                         case "decimal":
-                            colInfo.ts_type = "number";
-                            break;
                         case "int":
-                            colInfo.ts_type = "number";
-                            break;
                         case "money":
-                            colInfo.ts_type = "number";
-                            break;
                         case "numeric":
-                            colInfo.ts_type = "number";
-                            break;
                         case "smallint":
-                            colInfo.ts_type = "number";
-                            break;
                         case "smallmoney":
-                            colInfo.ts_type = "number";
-                            break;
                         case "tinyint":
-                            colInfo.ts_type = "number";
-                            break;
                         case "float":
-                            colInfo.ts_type = "number";
-                            break;
                         case "real":
                             colInfo.ts_type = "number";
                             break;
                         case "date":
-                            colInfo.ts_type = "Date";
-                            break;
                         case "datetime2":
-                            colInfo.ts_type = "Date";
-                            break;
                         case "datetime":
-                            colInfo.ts_type = "Date";
-                            break;
                         case "datetimeoffset":
-                            colInfo.ts_type = "Date";
-                            break;
                         case "smalldatetime":
-                            colInfo.ts_type = "Date";
-                            break;
                         case "time":
                             colInfo.ts_type = "Date";
                             break;
                         case "char":
-                            colInfo.ts_type = "string";
-                            break;
                         case "text":
-                            colInfo.ts_type = "string";
-                            break;
                         case "varchar":
-                            colInfo.ts_type = "string";
-                            break;
                         case "nchar":
-                            colInfo.ts_type = "string";
-                            break;
                         case "ntext":
-                            colInfo.ts_type = "string";
-                            break;
                         case "nvarchar":
+                        case "hierarchyid":
+                        case "sql_variant":
+                        case "uniqueidentifier":
+                        case "xml":
+                        case "geometry":
+                        case "geography":
                             colInfo.ts_type = "string";
                             break;
                         case "binary":
-                            colInfo.ts_type = "Buffer";
-                            break;
                         case "image":
-                            colInfo.ts_type = "Buffer";
-                            break;
                         case "varbinary":
                             colInfo.ts_type = "Buffer";
                             break;
-                        case "hierarchyid":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "sql_variant":
-                            colInfo.ts_type = "string";
-                            break;
                         case "timestamp":
                             colInfo.ts_type = "Date";
-                            break;
-                        case "uniqueidentifier":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "xml":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "geometry":
-                            colInfo.ts_type = "string";
-                            break;
-                        case "geography":
-                            colInfo.ts_type = "string";
                             break;
                         default:
                             TomgUtils.LogError(
@@ -195,6 +146,7 @@ export class MssqlDriver extends AbstractDriver {
         });
         return entities;
     }
+
     async GetIndexesFromEntity(
         entities: EntityInfo[],
         schema: string
@@ -256,6 +208,7 @@ ORDER BY
 
         return entities;
     }
+
     async GetRelations(
         entities: EntityInfo[],
         schema: string
@@ -344,11 +297,11 @@ order by
         );
         return entities;
     }
+
     async DisconnectFromServer() {
         if (this.Connection) await this.Connection.close();
     }
 
-    private Connection: MSSQL.ConnectionPool;
     async ConnectToServer(
         database: string,
         server: string,
@@ -386,18 +339,22 @@ order by
 
         await promise;
     }
+
     async CreateDB(dbName: string) {
         let request = new MSSQL.Request(this.Connection);
         await request.query(`CREATE DATABASE ${dbName}; `);
     }
+
     async UseDB(dbName: string) {
         let request = new MSSQL.Request(this.Connection);
         await request.query(`USE ${dbName}; `);
     }
+
     async DropDB(dbName: string) {
         let request = new MSSQL.Request(this.Connection);
         await request.query(`DROP DATABASE ${dbName}; `);
     }
+
     async CheckIfDBExists(dbName: string): Promise<boolean> {
         let request = new MSSQL.Request(this.Connection);
         let resp = await request.query(

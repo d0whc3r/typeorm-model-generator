@@ -26,6 +26,7 @@ export class ColumnInfo {
     numericScale: number | null = null;
     enumOptions: string | null = null;
     relations: RelationInfo[];
+
     constructor() {
         this.relations = [];
     }

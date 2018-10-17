@@ -1,9 +1,8 @@
-import { Index, Entity, PrimaryColumn, Column, OneToOne, OneToMany, ManyToOne, ManyToMany, JoinColumn, JoinTable } from "typeorm";
+import { Column, Entity, OneToOne } from "typeorm";
 import { PostReader } from "./PostReader";
 import { PostAuthor } from "./PostAuthor";
 import { PostCategory } from "./PostCategory";
 import { PostDetails } from "./PostDetails";
-
 
 @Entity("Post")
 export class Post {
