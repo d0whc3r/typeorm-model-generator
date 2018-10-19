@@ -3,6 +3,10 @@ import {Index,Entity, PrimaryColumn, PrimaryGeneratedColumn, Column, OneToOne, O
 {{/each}}
 import {{curly true}} Property, IgnoreProperty {{curly false}} from '@tsed/common';
 
+export interface I{{toEntityName EntityName}} {
+  {{#Columns}}{{^relations}}{{toPropertyName tsName}}: {{ts_type}}{{#is_nullable}} | null{{/is_nullable}};{{/relations}}
+  {{#relations}}{{#if (or isOneToMany isManyToMany)}}{{toPropertyName ../tsName}}: {{toLazy (concat  (toEntityName relatedTable) '[]')}};{{else}}{{toPropertyName ../tsName}}: {{toLazy (concat (toEntityName relatedTable) ' | null')}};{{/if}}{{/relations}}{{/Columns}}
+}
 
 @Entity('{{EntityName}}'{{#Schema}}, {schema:'{{.}}'}{{/Schema}})
 {{#Indexes}}{{^isPrimaryKey}}@Index('{{name}}',[{{#columns}}'{{toPropertyName name}}',{{/columns}}]{{#isUnique}},{unique:true}{{/isUnique}})
@@ -23,7 +27,7 @@ import {{curly true}} Property, IgnoreProperty {{curly false}} from '@tsed/commo
         array: {{is_array}}, {{/is_array}}
         name: '{{sqlName}}'
         })
-    {{#if (and (ne sqlName "path")(ne sqlName "password"))}}@Property(){{/if}}{{#if (or (eq sqlName "path")(eq sqlName "password"))}}@IgnoreProperty(){{/if}}
+    {{#if (and (ne sqlName "path")(ne sqlName "password"))}}@Property(){{else}}@IgnoreProperty(){{/if}}
     {{toPropertyName tsName}}: {{ts_type}}{{#is_nullable}} | null{{/is_nullable}};
     {{/relations}}{{#relations}}
     @{{relationType}}(type => {{toEntityName relatedTable}}, {{toEntityName relatedTable}} => {{toEntityName relatedTable}}.{{#if isOwner}}{{toPropertyName ownerColumn}}, { {{#../isPrimary}}primary:true,{{/../isPrimary}}{{^../is_nullable}} nullable:false,{{/../is_nullable}}{{#actionOnDelete}}onDelete: '{{.}}',{{/actionOnDelete}}{{#actionOnUpdate}}onUpdate: '{{.}}'{{/actionOnUpdate}} }{{else}}{{toPropertyName relatedColumn}}{{#if (or actionOnDelete actionOnUpdate ) }}{{#actionOnDelete}},{ onDelete: '{{.}}', {{/actionOnDelete}}{{#actionOnUpdate}}onUpdate: '{{.}}'{{/actionOnUpdate}} }{{/if}}{{/if}}){{#isOwner}}
